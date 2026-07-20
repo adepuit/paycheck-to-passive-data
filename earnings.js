@@ -81,7 +81,7 @@ export function mondayOf(iso) {
   return d.toISOString().slice(0, 10);
 }
 
-// n consecutive ISO days starting at mondayIso (default Mon–Fri).
+// n consecutive ISO days starting at mondayIso (default Mon-Fri).
 export function weekDays(mondayIso, n = 5) {
   const out = [];
   for (let i = 0; i < n; i++) out.push(addDaysISO(mondayIso, i));
