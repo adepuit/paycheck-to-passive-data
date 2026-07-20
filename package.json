@@ -1,0 +1,7 @@
+{
+  "name": "paycheck-to-passive-data",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "scripts": { "test": "node --test", "fetch": "node fetch-earnings.js" }
+}

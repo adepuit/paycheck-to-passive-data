@@ -1,0 +1,23 @@
+// Companies shown in the Earnings Hub. Edit this list to change coverage.
+export const WATCHLIST = [
+  { symbol: 'AAPL', name: 'Apple' },
+  { symbol: 'MSFT', name: 'Microsoft' },
+  { symbol: 'JNJ', name: 'Johnson & Johnson' },
+  { symbol: 'PG', name: 'Procter & Gamble' },
+  { symbol: 'KO', name: 'Coca-Cola' },
+  { symbol: 'PEP', name: 'PepsiCo' },
+  { symbol: 'ABBV', name: 'AbbVie' },
+  { symbol: 'XOM', name: 'Exxon Mobil' },
+  { symbol: 'CVX', name: 'Chevron' },
+  { symbol: 'JPM', name: 'JPMorgan Chase' },
+  { symbol: 'HD', name: 'Home Depot' },
+  { symbol: 'V', name: 'Visa' },
+  { symbol: 'MA', name: 'Mastercard' },
+  { symbol: 'AVGO', name: 'Broadcom' },
+  { symbol: 'MCD', name: "McDonald's" },
+  { symbol: 'PM', name: 'Philip Morris' },
+  { symbol: 'CAT', name: 'Caterpillar' },
+  { symbol: 'LMT', name: 'Lockheed Martin' },
+  { symbol: 'TXN', name: 'Texas Instruments' },
+  { symbol: 'O', name: 'Realty Income' },
+];
