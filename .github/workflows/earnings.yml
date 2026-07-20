@@ -15,6 +15,9 @@ jobs:
           node-version: '20'
       - name: Fetch earnings
         env:
+          # Default source is keyless Nasdaq — no secret needed.
+          # To use Finnhub instead, set EARNINGS_SOURCE to 'finnhub' and add the FINNHUB_API_KEY secret.
+          EARNINGS_SOURCE: nasdaq
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
         run: node fetch-earnings.js
       - name: Commit if changed

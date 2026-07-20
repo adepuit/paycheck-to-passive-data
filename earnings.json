@@ -1,10 +1,145 @@
 {
-  "generated": "2026-07-20T10:00:00Z",
-  "window": { "from": "2026-07-20", "to": "2026-08-10" },
-  "sample": true,
+  "generated": "2026-07-20T19:26:37.414Z",
+  "window": {
+    "from": "2026-07-20",
+    "to": "2026-08-10"
+  },
+  "sample": false,
   "events": [
-    { "symbol": "KO", "name": "Coca-Cola", "date": "2026-07-22", "hour": "bmo", "epsEstimate": 0.83, "quarter": 2, "year": 2026 },
-    { "symbol": "V", "name": "Visa", "date": "2026-07-28", "hour": "amc", "epsEstimate": 2.85, "quarter": 3, "year": 2026 },
-    { "symbol": "AAPL", "name": "Apple", "date": "2026-07-31", "hour": "amc", "epsEstimate": 1.43, "quarter": 3, "year": 2026 }
+    {
+      "symbol": "PM",
+      "name": "Philip Morris",
+      "date": "2026-07-22",
+      "hour": "bmo",
+      "epsEstimate": 2.04,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "TXN",
+      "name": "Texas Instruments",
+      "date": "2026-07-22",
+      "hour": "amc",
+      "epsEstimate": 1.91,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "LMT",
+      "name": "Lockheed Martin",
+      "date": "2026-07-23",
+      "hour": "bmo",
+      "epsEstimate": 7.28,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "KO",
+      "name": "Coca-Cola",
+      "date": "2026-07-28",
+      "hour": "bmo",
+      "epsEstimate": 0.92,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "V",
+      "name": "Visa",
+      "date": "2026-07-28",
+      "hour": "amc",
+      "epsEstimate": 3.22,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "MSFT",
+      "name": "Microsoft",
+      "date": "2026-07-29",
+      "hour": "amc",
+      "epsEstimate": 4.21,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "PG",
+      "name": "Procter & Gamble",
+      "date": "2026-07-29",
+      "hour": "bmo",
+      "epsEstimate": 1.41,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "AAPL",
+      "name": "Apple",
+      "date": "2026-07-30",
+      "hour": "amc",
+      "epsEstimate": 1.88,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "MA",
+      "name": "Mastercard",
+      "date": "2026-07-30",
+      "hour": "bmo",
+      "epsEstimate": 4.77,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "ABBV",
+      "name": "AbbVie",
+      "date": "2026-07-31",
+      "hour": "bmo",
+      "epsEstimate": 3.66,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "CVX",
+      "name": "Chevron",
+      "date": "2026-07-31",
+      "hour": "bmo",
+      "epsEstimate": 5.71,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "XOM",
+      "name": "Exxon Mobil",
+      "date": "2026-07-31",
+      "hour": "bmo",
+      "epsEstimate": 3.88,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "CAT",
+      "name": "Caterpillar",
+      "date": "2026-08-04",
+      "hour": "unknown",
+      "epsEstimate": 6.25,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "MCD",
+      "name": "McDonald's",
+      "date": "2026-08-04",
+      "hour": "bmo",
+      "epsEstimate": 3.32,
+      "quarter": null,
+      "year": null
+    },
+    {
+      "symbol": "O",
+      "name": "Realty Income",
+      "date": "2026-08-05",
+      "hour": "amc",
+      "epsEstimate": 1.09,
+      "quarter": null,
+      "year": null
+    }
   ]
 }
