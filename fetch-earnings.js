@@ -28,6 +28,13 @@ export function nasdaqTimeToHour(time) {
   return 'unknown';
 }
 
+// Parse a plain number that may carry $, commas, etc. (e.g. market cap, # estimates).
+export function parseNum(s) {
+  if (s == null) return null;
+  const n = parseFloat(String(s).replace(/[^0-9.]/g, ''));
+  return isFinite(n) ? n : null;
+}
+
 // One Nasdaq day payload -> Finnhub-shaped rows (so toEarningsData is reused unchanged).
 export function nasdaqRowsToCalendar(payload, date) {
   const rows = (payload && payload.data && Array.isArray(payload.data.rows)) ? payload.data.rows : [];
@@ -38,6 +45,10 @@ export function nasdaqRowsToCalendar(payload, date) {
       date,
       hour: nasdaqTimeToHour(r.time),
       epsEstimate: parseEpsForecast(r.epsForecast),
+      marketCap: parseNum(r.marketCap),
+      numEstimates: parseNum(r.noOfEsts),
+      lastYearEps: parseEpsForecast(r.lastYearEPS),
+      fiscalQuarter: (typeof r.fiscalQuarterEnding === 'string' && r.fiscalQuarterEnding) ? r.fiscalQuarterEnding : null,
     }));
 }
 

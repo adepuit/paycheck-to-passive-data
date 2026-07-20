@@ -41,24 +41,51 @@ export function groupByDay(events) {
   return [...byDate.keys()].sort().map((date) => ({ date, items: byDate.get(date) }));
 }
 
+function numOrNull(v) {
+  return (typeof v === 'number' && isFinite(v)) ? v : null;
+}
+
 export function toEarningsData(finnhubResponse, watchlist, todayISO, days) {
   const from = todayISO;
   const to = addDaysISO(todayISO, days);
-  const names = new Map(watchlist.map((w) => [w.symbol, w.name]));
+  const wl = new Map(watchlist.map((w) => [w.symbol, w]));
   const raw = (finnhubResponse && finnhubResponse.earningsCalendar) || [];
   const events = raw
-    .filter((e) => e && names.has(e.symbol) && e.date >= from && e.date <= to)
-    .map((e) => ({
-      symbol: e.symbol,
-      name: names.get(e.symbol),
-      date: e.date,
-      hour: normalizeHour(e.hour),
-      epsEstimate: (typeof e.epsEstimate === 'number') ? e.epsEstimate : null,
-      quarter: (typeof e.quarter === 'number') ? e.quarter : null,
-      year: (typeof e.year === 'number') ? e.year : null,
-    }))
+    .filter((e) => e && wl.has(e.symbol) && e.date >= from && e.date <= to)
+    .map((e) => {
+      const w = wl.get(e.symbol);
+      return {
+        symbol: e.symbol,
+        name: w.name,
+        domain: w.domain || null,
+        logo: w.logo || null,
+        date: e.date,
+        hour: normalizeHour(e.hour),
+        epsEstimate: numOrNull(e.epsEstimate),
+        marketCap: numOrNull(e.marketCap),
+        numEstimates: numOrNull(e.numEstimates),
+        lastYearEps: numOrNull(e.lastYearEps),
+        fiscalQuarter: (typeof e.fiscalQuarter === 'string' && e.fiscalQuarter) ? e.fiscalQuarter : null,
+      };
+    })
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.symbol < b.symbol ? -1 : a.symbol > b.symbol ? 1 : 0)));
   return { generated: new Date().toISOString(), window: { from, to }, sample: false, events };
+}
+
+// Monday (as YYYY-MM-DD) of the ISO date's week. UTC-noon parse avoids TZ drift.
+export function mondayOf(iso) {
+  const d = new Date(iso + 'T12:00:00Z');
+  const dow = d.getUTCDay(); // 0 Sun .. 6 Sat
+  const diff = dow === 0 ? -6 : 1 - dow;
+  d.setUTCDate(d.getUTCDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
+// n consecutive ISO days starting at mondayIso (default Mon–Fri).
+export function weekDays(mondayIso, n = 5) {
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(addDaysISO(mondayIso, i));
+  return out;
 }
 
 export function formatDayLabel(iso) {

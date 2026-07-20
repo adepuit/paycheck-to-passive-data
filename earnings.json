@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-20T19:26:37.414Z",
+  "generated": "2026-07-20T19:59:19.422Z",
   "window": {
     "from": "2026-07-20",
     "to": "2026-08-10"
@@ -9,137 +9,197 @@
     {
       "symbol": "PM",
       "name": "Philip Morris",
+      "domain": "pmi.com",
+      "logo": null,
       "date": "2026-07-22",
       "hour": "bmo",
       "epsEstimate": 2.04,
-      "quarter": null,
-      "year": null
+      "marketCap": 300770686101,
+      "numEstimates": 5,
+      "lastYearEps": 1.91,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "TXN",
       "name": "Texas Instruments",
+      "domain": "ti.com",
+      "logo": null,
       "date": "2026-07-22",
       "hour": "amc",
       "epsEstimate": 1.91,
-      "quarter": null,
-      "year": null
+      "marketCap": 258484554500,
+      "numEstimates": 9,
+      "lastYearEps": 1.41,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "LMT",
       "name": "Lockheed Martin",
+      "domain": "lockheedmartin.com",
+      "logo": null,
       "date": "2026-07-23",
       "hour": "bmo",
       "epsEstimate": 7.28,
-      "quarter": null,
-      "year": null
+      "marketCap": 117303846842,
+      "numEstimates": 6,
+      "lastYearEps": 7.29,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "KO",
       "name": "Coca-Cola",
+      "domain": "coca-colacompany.com",
+      "logo": null,
       "date": "2026-07-28",
       "hour": "bmo",
       "epsEstimate": 0.92,
-      "quarter": null,
-      "year": null
+      "marketCap": 351046708648,
+      "numEstimates": 7,
+      "lastYearEps": 0.87,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "V",
       "name": "Visa",
+      "domain": "visa.com",
+      "logo": null,
       "date": "2026-07-28",
       "hour": "amc",
       "epsEstimate": 3.22,
-      "quarter": null,
-      "year": null
+      "marketCap": 679280430662,
+      "numEstimates": 12,
+      "lastYearEps": 2.98,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "MSFT",
       "name": "Microsoft",
+      "domain": "microsoft.com",
+      "logo": null,
       "date": "2026-07-29",
       "hour": "amc",
       "epsEstimate": 4.21,
-      "quarter": null,
-      "year": null
+      "marketCap": 2925466155129,
+      "numEstimates": 15,
+      "lastYearEps": 3.65,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "PG",
       "name": "Procter & Gamble",
+      "domain": "pg.com",
+      "logo": null,
       "date": "2026-07-29",
       "hour": "bmo",
       "epsEstimate": 1.41,
-      "quarter": null,
-      "year": null
+      "marketCap": 349243274720,
+      "numEstimates": 10,
+      "lastYearEps": 1.48,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "AAPL",
       "name": "Apple",
+      "domain": "apple.com",
+      "logo": null,
       "date": "2026-07-30",
       "hour": "amc",
       "epsEstimate": 1.88,
-      "quarter": null,
-      "year": null
+      "marketCap": 4901758191440,
+      "numEstimates": 11,
+      "lastYearEps": 1.57,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "MA",
       "name": "Mastercard",
+      "domain": "mastercard.com",
+      "logo": null,
       "date": "2026-07-30",
       "hour": "bmo",
       "epsEstimate": 4.77,
-      "quarter": null,
-      "year": null
+      "marketCap": 480316183578,
+      "numEstimates": 12,
+      "lastYearEps": 4.15,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "ABBV",
       "name": "AbbVie",
+      "domain": "abbvie.com",
+      "logo": null,
       "date": "2026-07-31",
       "hour": "bmo",
       "epsEstimate": 3.66,
-      "quarter": null,
-      "year": null
+      "marketCap": 449631105016,
+      "numEstimates": 5,
+      "lastYearEps": 2.97,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "CVX",
       "name": "Chevron",
+      "domain": "chevron.com",
+      "logo": null,
       "date": "2026-07-31",
       "hour": "bmo",
       "epsEstimate": 5.71,
-      "quarter": null,
-      "year": null
+      "marketCap": 373185583022,
+      "numEstimates": 3,
+      "lastYearEps": 1.77,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "XOM",
       "name": "Exxon Mobil",
+      "domain": "exxonmobil.com",
+      "logo": null,
       "date": "2026-07-31",
       "hour": "bmo",
       "epsEstimate": 3.88,
-      "quarter": null,
-      "year": null
+      "marketCap": 610799413792,
+      "numEstimates": 4,
+      "lastYearEps": 1.64,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "CAT",
       "name": "Caterpillar",
+      "domain": "caterpillar.com",
+      "logo": null,
       "date": "2026-08-04",
       "hour": "unknown",
       "epsEstimate": 6.25,
-      "quarter": null,
-      "year": null
+      "marketCap": 405489561247,
+      "numEstimates": 10,
+      "lastYearEps": 4.72,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "MCD",
       "name": "McDonald's",
+      "domain": "mcdonalds.com",
+      "logo": null,
       "date": "2026-08-04",
       "hour": "bmo",
       "epsEstimate": 3.32,
-      "quarter": null,
-      "year": null
+      "marketCap": 190209523513,
+      "numEstimates": 9,
+      "lastYearEps": 3.19,
+      "fiscalQuarter": "Jun/2026"
     },
     {
       "symbol": "O",
       "name": "Realty Income",
+      "domain": "realtyincome.com",
+      "logo": null,
       "date": "2026-08-05",
       "hour": "amc",
       "epsEstimate": 1.09,
-      "quarter": null,
-      "year": null
+      "marketCap": 61274084146,
+      "numEstimates": 6,
+      "lastYearEps": 1.05,
+      "fiscalQuarter": "Jun/2026"
     }
   ]
 }

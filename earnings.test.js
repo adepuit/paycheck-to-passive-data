@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   addDaysISO, normalizeHour, validateEarningsData, isStale,
-  groupByDay, toEarningsData, formatDayLabel,
+  groupByDay, toEarningsData, formatDayLabel, mondayOf, weekDays,
 } from './earnings.js';
 
 test('addDaysISO adds calendar days without TZ drift', () => {
@@ -64,4 +64,30 @@ test('formatDayLabel returns weekday + month/day without off-by-one', () => {
   const f = formatDayLabel('2026-07-31');
   assert.equal(f.weekday, 'Fri');
   assert.equal(f.monthDay, 'Jul 31');
+});
+
+test('toEarningsData carries drilldown fields + domain from watchlist', () => {
+  const watchlist = [{ symbol: 'AAPL', name: 'Apple', domain: 'apple.com' }];
+  const resp = { earningsCalendar: [
+    { symbol: 'AAPL', date: '2026-07-31', hour: 'amc', epsEstimate: 1.42, marketCap: 3.1e12, numEstimates: 27, lastYearEps: 1.26, fiscalQuarter: 'Jun 2026' },
+  ] };
+  const e = toEarningsData(resp, watchlist, '2026-07-20', 21).events[0];
+  assert.equal(e.domain, 'apple.com');
+  assert.equal(e.marketCap, 3.1e12);
+  assert.equal(e.numEstimates, 27);
+  assert.equal(e.lastYearEps, 1.26);
+  assert.equal(e.fiscalQuarter, 'Jun 2026');
+  assert.equal(e.logo, null);
+});
+
+test('mondayOf returns the Monday of the week for any weekday', () => {
+  assert.equal(mondayOf('2026-07-20'), '2026-07-20'); // Monday -> itself
+  assert.equal(mondayOf('2026-07-22'), '2026-07-20'); // Wednesday
+  assert.equal(mondayOf('2026-07-24'), '2026-07-20'); // Friday
+  assert.equal(mondayOf('2026-07-26'), '2026-07-20'); // Sunday -> prior Monday
+  assert.equal(mondayOf('2026-07-27'), '2026-07-27'); // next Monday
+});
+
+test('weekDays returns 5 weekdays from Monday by default', () => {
+  assert.deepEqual(weekDays('2026-07-20'), ['2026-07-20', '2026-07-21', '2026-07-22', '2026-07-23', '2026-07-24']);
 });

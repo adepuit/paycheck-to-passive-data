@@ -18,14 +18,17 @@ test('nasdaqTimeToHour maps pre/after, else unknown', () => {
   assert.equal(nasdaqTimeToHour('time-not-supplied'), 'unknown');
 });
 
-test('nasdaqRowsToCalendar maps rows, skips symbol-less, tolerates empty', () => {
+test('nasdaqRowsToCalendar maps rows incl. drilldown fields, skips symbol-less, tolerates empty', () => {
   const payload = { data: { rows: [
-    { symbol: 'aapl', time: 'time-after-hours', epsForecast: '$1.43' },
+    { symbol: 'aapl', time: 'time-after-hours', epsForecast: '$1.43', marketCap: '$3,100,000,000,000', noOfEsts: '27', lastYearEPS: '$1.26', fiscalQuarterEnding: 'Jun 2026' },
     { name: 'no symbol', time: 'time-pre-market' },
   ] } };
   const rows = nasdaqRowsToCalendar(payload, '2026-07-31');
   assert.equal(rows.length, 1);
-  assert.deepEqual(rows[0], { symbol: 'AAPL', date: '2026-07-31', hour: 'amc', epsEstimate: 1.43 });
+  assert.deepEqual(rows[0], {
+    symbol: 'AAPL', date: '2026-07-31', hour: 'amc', epsEstimate: 1.43,
+    marketCap: 3100000000000, numEstimates: 27, lastYearEps: 1.26, fiscalQuarter: 'Jun 2026',
+  });
   assert.deepEqual(nasdaqRowsToCalendar(null, '2026-07-31'), []);
   assert.deepEqual(nasdaqRowsToCalendar({ data: { rows: null } }, '2026-07-31'), []);
 });
