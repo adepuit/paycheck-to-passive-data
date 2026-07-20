@@ -1,0 +1,10 @@
+{
+  "generated": "2026-07-20T10:00:00Z",
+  "window": { "from": "2026-07-20", "to": "2026-08-10" },
+  "sample": true,
+  "events": [
+    { "symbol": "KO", "name": "Coca-Cola", "date": "2026-07-22", "hour": "bmo", "epsEstimate": 0.83, "quarter": 2, "year": 2026 },
+    { "symbol": "V", "name": "Visa", "date": "2026-07-28", "hour": "amc", "epsEstimate": 2.85, "quarter": 3, "year": 2026 },
+    { "symbol": "AAPL", "name": "Apple", "date": "2026-07-31", "hour": "amc", "epsEstimate": 1.43, "quarter": 3, "year": 2026 }
+  ]
+}
