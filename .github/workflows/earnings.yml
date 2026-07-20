@@ -1,0 +1,30 @@
+name: earnings
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch earnings
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+        run: node fetch-earnings.js
+      - name: Commit if changed
+        run: |
+          if ! git diff --quiet earnings.json; then
+            git config user.name "earnings-bot"
+            git config user.email "actions@github.com"
+            git add earnings.json
+            git commit -m "Update earnings.json ($(date -u +%Y-%m-%d))"
+            git push
+          else
+            echo "No change."
+          fi
