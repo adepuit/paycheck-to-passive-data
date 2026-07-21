@@ -45,9 +45,11 @@ function numOrNull(v) {
   return (typeof v === 'number' && isFinite(v)) ? v : null;
 }
 
-// Trim noisy exchange suffixes from raw provider names.
+// Trim noisy exchange/security suffixes from raw provider names.
 export function cleanName(n) {
-  return String(n || '').replace(/\s+Common Stock$/i, '').trim();
+  return String(n || '')
+    .replace(/\s*(Class\s+[A-Z]\s+)?(Common Stock|Common Shares|Ordinary Shares|American Depositary Shares|Depositary Shares|Depositary Units)$/i, '')
+    .trim();
 }
 
 // Whole US market: keep every company in the window. Overlay the watchlist for
