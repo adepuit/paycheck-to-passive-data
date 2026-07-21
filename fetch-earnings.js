@@ -42,6 +42,7 @@ export function nasdaqRowsToCalendar(payload, date) {
     .filter((r) => r && r.symbol)
     .map((r) => ({
       symbol: String(r.symbol).trim().toUpperCase(),
+      name: (typeof r.name === 'string') ? r.name : null,
       date,
       hour: nasdaqTimeToHour(r.time),
       epsEstimate: parseEpsForecast(r.epsForecast),
@@ -112,7 +113,7 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
   const source = process.env.EARNINGS_SOURCE || DEFAULT_SOURCE;
   fetchEarnings({ source, token: process.env.FINNHUB_API_KEY })
     .then((data) => {
-      writeFileSync(OUT, JSON.stringify(data, null, 2) + '\n');
+      writeFileSync(OUT, JSON.stringify(data) + '\n'); // compact: the whole-market file is large
       console.log(`[${source}] wrote ${data.events.length} events for ${data.window.from}..${data.window.to}`);
     })
     .catch((err) => { console.error('fetch-earnings failed:', err.message); process.exit(1); });

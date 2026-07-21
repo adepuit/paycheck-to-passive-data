@@ -45,20 +45,29 @@ function numOrNull(v) {
   return (typeof v === 'number' && isFinite(v)) ? v : null;
 }
 
-export function toEarningsData(finnhubResponse, watchlist, todayISO, days) {
+// Trim noisy exchange suffixes from raw provider names.
+export function cleanName(n) {
+  return String(n || '').replace(/\s+Common Stock$/i, '').trim();
+}
+
+// Whole US market: keep every company in the window. Overlay the watchlist for
+// clean names, logos/domains, and a `watch` flag (so the tool can offer a
+// "My list" view). Sorted by date, then market cap (biggest first) within a day.
+export function toEarningsData(response, watchlist, todayISO, days) {
   const from = todayISO;
   const to = addDaysISO(todayISO, days);
   const wl = new Map(watchlist.map((w) => [w.symbol, w]));
-  const raw = (finnhubResponse && finnhubResponse.earningsCalendar) || [];
+  const raw = (response && response.earningsCalendar) || [];
   const events = raw
-    .filter((e) => e && wl.has(e.symbol) && e.date >= from && e.date <= to)
+    .filter((e) => e && e.symbol && e.date >= from && e.date <= to)
     .map((e) => {
       const w = wl.get(e.symbol);
       return {
         symbol: e.symbol,
-        name: w.name,
-        domain: w.domain || null,
-        logo: w.logo || null,
+        name: w ? w.name : (cleanName(e.name) || e.symbol),
+        domain: (w && w.domain) || null,
+        logo: (w && w.logo) || null,
+        watch: !!w,
         date: e.date,
         hour: normalizeHour(e.hour),
         epsEstimate: numOrNull(e.epsEstimate),
@@ -68,7 +77,8 @@ export function toEarningsData(finnhubResponse, watchlist, todayISO, days) {
         fiscalQuarter: (typeof e.fiscalQuarter === 'string' && e.fiscalQuarter) ? e.fiscalQuarter : null,
       };
     })
-    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.symbol < b.symbol ? -1 : a.symbol > b.symbol ? 1 : 0)));
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1
+      : ((b.marketCap || 0) - (a.marketCap || 0)) || (a.symbol < b.symbol ? -1 : a.symbol > b.symbol ? 1 : 0)));
   return { generated: new Date().toISOString(), window: { from, to }, sample: false, events };
 }
 

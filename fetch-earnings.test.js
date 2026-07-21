@@ -20,13 +20,13 @@ test('nasdaqTimeToHour maps pre/after, else unknown', () => {
 
 test('nasdaqRowsToCalendar maps rows incl. drilldown fields, skips symbol-less, tolerates empty', () => {
   const payload = { data: { rows: [
-    { symbol: 'aapl', time: 'time-after-hours', epsForecast: '$1.43', marketCap: '$3,100,000,000,000', noOfEsts: '27', lastYearEPS: '$1.26', fiscalQuarterEnding: 'Jun 2026' },
+    { symbol: 'aapl', name: 'Apple Inc. Common Stock', time: 'time-after-hours', epsForecast: '$1.43', marketCap: '$3,100,000,000,000', noOfEsts: '27', lastYearEPS: '$1.26', fiscalQuarterEnding: 'Jun 2026' },
     { name: 'no symbol', time: 'time-pre-market' },
   ] } };
   const rows = nasdaqRowsToCalendar(payload, '2026-07-31');
   assert.equal(rows.length, 1);
   assert.deepEqual(rows[0], {
-    symbol: 'AAPL', date: '2026-07-31', hour: 'amc', epsEstimate: 1.43,
+    symbol: 'AAPL', name: 'Apple Inc. Common Stock', date: '2026-07-31', hour: 'amc', epsEstimate: 1.43,
     marketCap: 3100000000000, numEstimates: 27, lastYearEps: 1.26, fiscalQuarter: 'Jun 2026',
   });
   assert.deepEqual(nasdaqRowsToCalendar(null, '2026-07-31'), []);
@@ -38,22 +38,24 @@ test('weekdayWindow excludes weekends', () => {
   assert.deepEqual(w, ['2026-07-20', '2026-07-21', '2026-07-22', '2026-07-23', '2026-07-24', '2026-07-27']);
 });
 
-test('fetchEarnings(nasdaq) filters to watchlist and validates', async () => {
+test('fetchEarnings(nasdaq) includes whole market and flags watchlist names', async () => {
   const stub = async (url) => {
     const date = new URL(url).searchParams.get('date');
     const rows = date === '2026-07-22'
-      ? [{ symbol: 'AAPL', time: 'time-after-hours', epsForecast: '$1.43' },
-         { symbol: 'ZZZZ', time: 'time-pre-market', epsForecast: '$9.00' }]
+      ? [{ symbol: 'AAPL', name: 'Apple Inc. Common Stock', time: 'time-after-hours', epsForecast: '$1.43' },
+         { symbol: 'ZZZZ', name: 'Zzzz Holdings Common Stock', time: 'time-pre-market', epsForecast: '$9.00' }]
       : [];
     return { ok: true, json: async () => ({ data: { rows } }) };
   };
   const d = await fetchEarnings({ source: 'nasdaq', fetchImpl: stub, now: '2026-07-20' });
   assert.equal(d.sample, false);
-  assert.equal(d.events.length, 1);
-  assert.equal(d.events[0].symbol, 'AAPL');
-  assert.equal(d.events[0].name, 'Apple');
-  assert.equal(d.events[0].hour, 'amc');
-  assert.equal(d.events[0].epsEstimate, 1.43);
+  assert.equal(d.events.length, 2); // both included (whole market)
+  const aapl = d.events.find((e) => e.symbol === 'AAPL');
+  assert.equal(aapl.watch, true);
+  assert.equal(aapl.name, 'Apple'); // watchlist override
+  const zzzz = d.events.find((e) => e.symbol === 'ZZZZ');
+  assert.equal(zzzz.watch, false);
+  assert.equal(zzzz.name, 'Zzzz Holdings'); // provider name, suffix stripped
 });
 
 test('fetchEarnings(nasdaq) throws when every request fails (never overwrites good data)', async () => {

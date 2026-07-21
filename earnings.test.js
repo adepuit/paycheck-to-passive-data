@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   addDaysISO, normalizeHour, validateEarningsData, isStale,
-  groupByDay, toEarningsData, formatDayLabel, mondayOf, weekDays,
+  groupByDay, toEarningsData, formatDayLabel, mondayOf, weekDays, cleanName,
 } from './earnings.js';
 
 test('addDaysISO adds calendar days without TZ drift', () => {
@@ -43,21 +43,30 @@ test('groupByDay groups and date-orders; empty -> []', () => {
   assert.deepEqual(groupByDay([]), []);
 });
 
-test('toEarningsData filters to watchlist + window, maps, sorts', () => {
-  const watchlist = [{ symbol: 'AAPL', name: 'Apple' }, { symbol: 'KO', name: 'Coca-Cola' }];
+test('cleanName strips exchange suffix', () => {
+  assert.equal(cleanName('Apple Inc. Common Stock'), 'Apple Inc.');
+  assert.equal(cleanName('Zzz Corp'), 'Zzz Corp');
+});
+
+test('toEarningsData includes the whole market, flags watchlist, sorts by cap within a day', () => {
+  const watchlist = [{ symbol: 'AAPL', name: 'Apple', domain: 'apple.com' }];
   const resp = { earningsCalendar: [
-    { symbol: 'AAPL', date: '2026-07-31', hour: 'amc', epsEstimate: 1.42, quarter: 3, year: 2026 },
-    { symbol: 'KO', date: '2026-07-22', hour: 'bmo', epsEstimate: null, quarter: 2, year: 2026 },
-    { symbol: 'ZZZ', date: '2026-07-25', hour: 'amc', epsEstimate: 9 },
-    { symbol: 'AAPL', date: '2026-09-30', hour: 'amc', epsEstimate: 2 },
+    { symbol: 'AAPL', name: 'Apple Inc. Common Stock', date: '2026-07-31', hour: 'amc', epsEstimate: 1.42, marketCap: 3.1e12 },
+    { symbol: 'ZZZ', name: 'Zzz Corp Common Stock', date: '2026-07-31', hour: 'bmo', epsEstimate: 0.1, marketCap: 5e9 },
+    { symbol: 'BIG', name: 'Big Co', date: '2026-07-31', hour: 'amc', epsEstimate: 2, marketCap: 9e12 },
+    { symbol: 'OLD', name: 'Old Co', date: '2026-09-30', hour: 'amc' },
   ] };
   const d = toEarningsData(resp, watchlist, '2026-07-20', 21);
-  assert.equal(d.sample, false);
-  assert.deepEqual(d.window, { from: '2026-07-20', to: '2026-08-10' });
-  assert.deepEqual(d.events.map((e) => e.symbol), ['KO', 'AAPL']);
-  assert.equal(d.events[0].name, 'Coca-Cola');
-  assert.equal(d.events[0].epsEstimate, null);
-  assert.equal(d.events[1].hour, 'amc');
+  assert.equal(d.events.length, 3); // OLD out of window
+  assert.deepEqual(d.events.map((e) => e.symbol), ['BIG', 'AAPL', 'ZZZ']); // market cap desc within day
+  const aapl = d.events.find((e) => e.symbol === 'AAPL');
+  assert.equal(aapl.watch, true);
+  assert.equal(aapl.name, 'Apple');
+  assert.equal(aapl.domain, 'apple.com');
+  const zzz = d.events.find((e) => e.symbol === 'ZZZ');
+  assert.equal(zzz.watch, false);
+  assert.equal(zzz.name, 'Zzz Corp'); // suffix stripped, no watchlist override
+  assert.equal(zzz.domain, null);
 });
 
 test('formatDayLabel returns weekday + month/day without off-by-one', () => {
@@ -78,6 +87,7 @@ test('toEarningsData carries drilldown fields + domain from watchlist', () => {
   assert.equal(e.lastYearEps, 1.26);
   assert.equal(e.fiscalQuarter, 'Jun 2026');
   assert.equal(e.logo, null);
+  assert.equal(e.watch, true);
 });
 
 test('mondayOf returns the Monday of the week for any weekday', () => {
