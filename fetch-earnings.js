@@ -1,8 +1,9 @@
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { WATCHLIST } from './watchlist.js';
-import { todayET, addDaysISO, toEarningsData, validateEarningsData } from './earnings.js';
+import { todayET, addDaysISO, toEarningsData, mergePrevious, validateEarningsData } from './earnings.js';
 
 const DAYS = 21;
+const PAST_DAYS = 30; // keep a month of reported earnings, so a missed one still shows up
 const OUT = new URL('./earnings.json', import.meta.url);
 // Default source is keyless Nasdaq. Set EARNINGS_SOURCE=finnhub (+ FINNHUB_API_KEY)
 // to switch providers without changing any other code.
@@ -28,6 +29,13 @@ export function nasdaqTimeToHour(time) {
   return 'unknown';
 }
 
+// A signed plain number, e.g. % surprise "11.39" or "-25"; "N/A"/"" -> null.
+export function parseSigned(s) {
+  if (s == null) return null;
+  const n = parseFloat(String(s).replace(/[^0-9.-]/g, ''));
+  return isFinite(n) ? n : null;
+}
+
 // Parse a plain number that may carry $, commas, etc. (e.g. market cap, # estimates).
 export function parseNum(s) {
   if (s == null) return null;
@@ -50,13 +58,15 @@ export function nasdaqRowsToCalendar(payload, date) {
       numEstimates: parseNum(r.noOfEsts),
       lastYearEps: parseEpsForecast(r.lastYearEPS),
       fiscalQuarter: (typeof r.fiscalQuarterEnding === 'string' && r.fiscalQuarterEnding) ? r.fiscalQuarterEnding : null,
+      eps: parseEpsForecast(r.eps),
+      surprise: parseSigned(r.surprise),
     }));
 }
 
-// List of YYYY-MM-DD weekdays in [now, now+days].
-export function weekdayWindow(now, days) {
+// List of YYYY-MM-DD weekdays in [now-pastDays, now+days].
+export function weekdayWindow(now, days, pastDays = 0) {
   const out = [];
-  for (let i = 0; i <= days; i++) {
+  for (let i = -pastDays; i <= days; i++) {
     const iso = addDaysISO(now, i);
     const dow = new Date(iso + 'T12:00:00Z').getUTCDay(); // 0 Sun .. 6 Sat
     if (dow !== 0 && dow !== 6) out.push(iso);
@@ -66,29 +76,30 @@ export function weekdayWindow(now, days) {
 
 // --- source adapters (each returns a Finnhub-shaped { earningsCalendar: [...] }) ---
 
-async function fetchFromNasdaq(now, days, fetchImpl) {
-  const dates = weekdayWindow(now, days);
+async function fetchFromNasdaq(now, days, pastDays, fetchImpl) {
+  const dates = weekdayWindow(now, days, pastDays);
   const headers = { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' };
   const earningsCalendar = [];
+  const missingDays = [];
   let ok = 0;
   for (const date of dates) {
     try {
       const res = await fetchImpl(`https://api.nasdaq.com/api/calendar/earnings?date=${date}`, { headers });
-      if (!res.ok) continue;
+      if (!res.ok) { missingDays.push(date); continue; }
       const payload = await res.json();
       earningsCalendar.push(...nasdaqRowsToCalendar(payload, date));
       ok += 1;
     } catch {
-      // skip this day; a single bad day shouldn't abort the window
+      missingDays.push(date); // a single bad day shouldn't abort the window
     }
   }
   if (ok === 0) throw new Error('All Nasdaq requests failed');
-  return { earningsCalendar };
+  return { earningsCalendar, missingDays };
 }
 
-async function fetchFromFinnhub(token, now, days, fetchImpl) {
+async function fetchFromFinnhub(token, now, days, pastDays, fetchImpl) {
   if (!token) throw new Error('FINNHUB_API_KEY is not set');
-  const from = now;
+  const from = addDaysISO(now, -pastDays);
   const to = addDaysISO(now, days);
   const res = await fetchImpl(`https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${token}`);
   if (!res.ok) throw new Error('Finnhub HTTP ' + res.status);
@@ -99,11 +110,12 @@ async function fetchFromFinnhub(token, now, days, fetchImpl) {
 
 // --- main entry ---
 
-export async function fetchEarnings({ source = DEFAULT_SOURCE, token, fetchImpl = fetch, now = todayET() } = {}) {
+// `previous` is the last earnings.json, used to fill what the provider drops for past days.
+export async function fetchEarnings({ source = DEFAULT_SOURCE, token, fetchImpl = fetch, now = todayET(), previous = null } = {}) {
   const raw = source === 'finnhub'
-    ? await fetchFromFinnhub(token, now, DAYS, fetchImpl)
-    : await fetchFromNasdaq(now, DAYS, fetchImpl);
-  const data = toEarningsData(raw, WATCHLIST, now, DAYS);
+    ? await fetchFromFinnhub(token, now, DAYS, PAST_DAYS, fetchImpl)
+    : await fetchFromNasdaq(now, DAYS, PAST_DAYS, fetchImpl);
+  const data = mergePrevious(toEarningsData(raw, WATCHLIST, now, DAYS, PAST_DAYS), previous, raw.missingDays);
   if (!validateEarningsData(data)) throw new Error('Produced data failed validation');
   return data;
 }
@@ -111,7 +123,9 @@ export async function fetchEarnings({ source = DEFAULT_SOURCE, token, fetchImpl 
 // CLI: fetch and write, but never overwrite with junk (throws => non-zero exit, file untouched).
 if (process.argv[1] === new URL(import.meta.url).pathname) {
   const source = process.env.EARNINGS_SOURCE || DEFAULT_SOURCE;
-  fetchEarnings({ source, token: process.env.FINNHUB_API_KEY })
+  let previous = null;
+  try { previous = JSON.parse(readFileSync(OUT, 'utf8')); } catch { /* first run */ }
+  fetchEarnings({ source, token: process.env.FINNHUB_API_KEY, previous })
     .then((data) => {
       writeFileSync(OUT, JSON.stringify(data) + '\n'); // compact: the whole-market file is large
       console.log(`[${source}] wrote ${data.events.length} events for ${data.window.from}..${data.window.to}`);

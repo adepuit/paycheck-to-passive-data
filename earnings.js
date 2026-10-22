@@ -52,11 +52,17 @@ export function cleanName(n) {
     .trim();
 }
 
-// Whole US market: keep every company in the window. Overlay the watchlist for
-// clean names, logos/domains, and a `watch` flag (so the tool can offer a
-// "My list" view). Sorted by date, then market cap (biggest first) within a day.
-export function toEarningsData(response, watchlist, todayISO, days) {
-  const from = todayISO;
+// By date, then market cap (biggest first) within a day.
+function byDateThenCap(a, b) {
+  return a.date < b.date ? -1 : a.date > b.date ? 1
+    : ((b.marketCap || 0) - (a.marketCap || 0)) || (a.symbol < b.symbol ? -1 : a.symbol > b.symbol ? 1 : 0);
+}
+
+// Whole US market: keep every company in the window (pastDays back to days ahead). Overlay
+// the watchlist for clean names, logos/domains, and a `watch` flag (so the tool can offer a
+// "My list" view). Past days carry the reported EPS and % surprise.
+export function toEarningsData(response, watchlist, todayISO, days, pastDays = 0) {
+  const from = addDaysISO(todayISO, -pastDays);
   const to = addDaysISO(todayISO, days);
   const wl = new Map(watchlist.map((w) => [w.symbol, w]));
   const raw = (response && response.earningsCalendar) || [];
@@ -77,11 +83,34 @@ export function toEarningsData(response, watchlist, todayISO, days) {
         numEstimates: numOrNull(e.numEstimates),
         lastYearEps: numOrNull(e.lastYearEps),
         fiscalQuarter: (typeof e.fiscalQuarter === 'string' && e.fiscalQuarter) ? e.fiscalQuarter : null,
+        eps: numOrNull(e.eps),
+        surprise: numOrNull(e.surprise),
       };
     })
-    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1
-      : ((b.marketCap || 0) - (a.marketCap || 0)) || (a.symbol < b.symbol ? -1 : a.symbol > b.symbol ? 1 : 0)));
+    .sort(byDateThenCap);
   return { generated: new Date().toISOString(), window: { from, to }, sample: false, events };
+}
+
+// Fills gaps from the previous file: once a day has passed, the provider drops its
+// before-open/after-close time and some estimates, so those carry over. Days that failed
+// to fetch (missingDays) keep the previous file's companies.
+export function mergePrevious(data, previous, missingDays = []) {
+  if (!validateEarningsData(previous)) return data;
+  const prev = new Map(previous.events.map((e) => [e.date + '|' + e.symbol, e]));
+  const events = data.events.map((e) => {
+    const p = prev.get(e.date + '|' + e.symbol);
+    if (!p) return e;
+    const out = { ...e };
+    for (const k of Object.keys(p)) {
+      if (out[k] == null || (k === 'hour' && out.hour === 'unknown')) out[k] = p[k];
+    }
+    return out;
+  });
+  const missing = new Set(missingDays);
+  for (const e of previous.events) {
+    if (missing.has(e.date) && e.date >= data.window.from && e.date <= data.window.to) events.push(e);
+  }
+  return { ...data, events: events.sort(byDateThenCap) };
 }
 
 // Monday (as YYYY-MM-DD) of the ISO date's week. UTC-noon parse avoids TZ drift.
