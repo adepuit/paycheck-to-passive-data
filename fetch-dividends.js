@@ -1,3 +1,4 @@
+import { writeFileSync } from 'node:fs';
 import { WATCHLIST } from './watchlist.js';
 import { todayET, addDaysISO } from './earnings.js';
 import { toTickerMap, toDividendsData, validateDividendsData } from './dividends.js';
@@ -5,6 +6,7 @@ import { toTickerMap, toDividendsData, validateDividendsData } from './dividends
 const DAYS = 21; // forward only: announced ex-dates from today through 3 weeks out
 const MIN_TICKERS = 8000; // measured ~13,250 US-listed tickers; far fewer means a truncated list
 const API = 'https://api.polygon.io';
+const OUT = new URL('./dividends.json', import.meta.url);
 const PAGE_GAP_MS = 13000; // free tier allows 5 requests/minute
 const RETRY_WAIT_MS = 60000;
 const ATTEMPTS = 3;
@@ -67,4 +69,14 @@ export async function fetchDividends({ token, fetchImpl = fetch, now = todayET()
   const data = toDividendsData(rows, tickers, WATCHLIST, now, DAYS);
   if (!validateDividendsData(data)) throw new Error('Produced dividends data failed validation');
   return data;
+}
+
+// CLI: fetch and write, but never overwrite with junk (throws => non-zero exit, file untouched).
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+  fetchDividends({ token: process.env.POLYGON_API_KEY })
+    .then((data) => {
+      writeFileSync(OUT, JSON.stringify(data) + '\n'); // compact, like earnings.json
+      console.log(`wrote ${data.dividends.length} dividends for ${data.window.from}..${data.window.to}`);
+    })
+    .catch((err) => { console.error('fetch-dividends failed:', err.message); process.exit(1); });
 }
