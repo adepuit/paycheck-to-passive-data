@@ -78,7 +78,8 @@ never logged (error messages print URL path only, not query).
 **Workflow** (`.github/workflows/earnings.yml`): new "Fetch dividends" step after
 earnings, `if: ${{ !cancelled() }}`, env `POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}`.
 Add `concurrency: { group: earnings, cancel-in-progress: false }` so a manual run and
-the cron never push at once, and `timeout-minutes: 20` on the job.
+the cron never push at once, and `timeout-minutes: 12` on the dividends **step** (a job-level
+timeout would cancel the commit step and lose earnings; changed during planning).
 Commit step also `if: ${{ !cancelled() }}`: `git add earnings.json dividends.json`, commit
 only if `git diff --cached --quiet` reports changes (plain `git diff --quiet` ignores a
 new untracked file — verified). Failing step still marks the job red.
@@ -125,7 +126,7 @@ Models: Skeptic → sonnet, Simplifier → sonnet, Edge-Case Hunter → sonnet, 
 2. [med] ETFs might be absent from `/v3/reference/tickers?market=stocks` (Skeptic).
    **Refuted:** SCHD/VYM/DGRO/SPY/VOO/JEPI present as ARCX/ETF.
 3. [high] One transient 429/5xx fails the run (Edge-Case, Skeptic). **Resolved:** 3
-   attempts per request, 60 s apart; job `timeout-minutes: 20`.
+   attempts per request, 60 s apart; step `timeout-minutes: 12`.
 4. [med] 25%-of-previous rule: Simplifier says delete; Edge-Case says it can wedge stale
    data in a sparse week. Both point the same way. **Resolved:** dropped; the real
    partial-data risk (short ticker map) now has its own check.
