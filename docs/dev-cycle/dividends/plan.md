@@ -7,7 +7,7 @@ Conventions (match the repo): ES modules, `node:test` + `node:assert/strict`, pu
 `dividends.js`, I/O in `fetch-dividends.js`, tests beside sources. Run tests with `npm test`
 (baseline: 22 passing). Work on branch `dividends`.
 
-### [ ] Step 1: Ticker map and listed-symbol resolution
+### [x] Step 1: Ticker map and listed-symbol resolution
 
 **Files:** create `dividends.js`, create `dividends.test.js`
 
@@ -50,7 +50,7 @@ test('resolveListed: direct match, preferred PR<X> -> p<X>, dot -> dash output, 
 
 **Commit:** `Add ticker map and listed-symbol resolution for dividends`
 
-### [ ] Step 2: Transform Polygon dividends into dividends.json shape
+### [x] Step 2: Transform Polygon dividends into dividends.json shape
 
 **Files:** modify `dividends.js`, `dividends.test.js`
 
@@ -112,7 +112,7 @@ test('toDividendsData: BRK.B matches watchlist BRK-B; special flag; exact-dup re
 
 **Commit:** `Transform Polygon dividends into dividends.json shape`
 
-### [ ] Step 3: Validate dividends data
+### [x] Step 3: Validate dividends data
 
 **Files:** modify `dividends.js`, `dividends.test.js`
 
@@ -137,7 +137,7 @@ test('validateDividendsData requires shape and at least one dividend', () => {
 
 **Commit:** `Validate dividends data`
 
-### [ ] Step 4: Paginated Polygon fetch with rate-limit spacing, retries, page cap
+### [x] Step 4: Paginated Polygon fetch with rate-limit spacing, retries, page cap
 
 **Files:** create `fetch-dividends.js`, create `fetch-dividends.test.js`
 
@@ -195,7 +195,7 @@ test('fetchAllPages throws on non-retryable status, bad shape, or page cap; neve
 
 **Commit:** `Fetch paginated Polygon results with spacing, retries and a page cap`
 
-### [ ] Step 5: fetchDividends end to end (token check, ticker floor, validation)
+### [x] Step 5: fetchDividends end to end (token check, ticker floor, validation)
 
 **Files:** modify `fetch-dividends.js`, `fetch-dividends.test.js`
 
@@ -246,7 +246,7 @@ test('fetchDividends throws without token, on short ticker list, or when nothing
 
 **Commit:** `Fetch whole-market dividends from Polygon`
 
-### [ ] Step 6: CLI entry and npm script
+### [x] Step 6: CLI entry and npm script
 
 **Files:** modify `fetch-dividends.js`, `package.json`
 
@@ -262,7 +262,7 @@ Before: `exit=0`, `ABSENT` (module has no CLI yet — proves the check can fail)
 
 **Commit:** `Add fetch-dividends CLI and npm script`
 
-### [ ] Step 7: Workflow step, concurrency, commit both files; README
+### [x] Step 7: Workflow step, concurrency, commit both files; README
 
 **Files:** modify `.github/workflows/earnings.yml`, `README.md`
 
@@ -287,7 +287,7 @@ README: "Dividends" section — source Polygon free tier, `POLYGON_API_KEY` secr
 
 **Commit:** `Run dividends fetch in the daily workflow and document setup`
 
-### [ ] Step 8: Live run and initial dividends.json
+### [x] Step 8: Live run and initial dividends.json
 
 **Files:** create `dividends.json` (generated)
 
