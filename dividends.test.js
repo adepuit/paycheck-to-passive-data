@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { toTickerMap, resolveListed, toDividendsData } from './dividends.js';
+import { toTickerMap, resolveListed, toDividendsData, validateDividendsData } from './dividends.js';
 
 const TICKERS = [
   { ticker: 'KO', name: 'Coca-Cola Company', primary_exchange: 'XNYS', type: 'CS' },
@@ -72,4 +72,14 @@ test('toDividendsData: BRK.B matches watchlist BRK-B; special flag; exact-dup re
   assert.equal(d.dividends[0].watch, true);
   assert.equal(d.dividends[0].name, 'Berkshire Hathaway');
   assert.deepEqual(toDividendsData(null, m, WL, '2026-10-28', 21).dividends, []);
+});
+
+test('validateDividendsData requires shape and at least one dividend', () => {
+  const good = { generated: '2026-10-28T10:00:00Z', window: { from: '2026-10-28', to: '2026-11-18' }, dividends: [{ symbol: 'KO', exDate: '2026-11-05' }] };
+  assert.equal(validateDividendsData(good), true);
+  assert.equal(validateDividendsData({ ...good, dividends: [] }), false);
+  assert.equal(validateDividendsData(null), false);
+  assert.equal(validateDividendsData({ ...good, window: {} }), false);
+  assert.equal(validateDividendsData({ ...good, generated: 5 }), false);
+  assert.equal(validateDividendsData({ ...good, dividends: [{ symbol: 'KO' }] }), false);
 });

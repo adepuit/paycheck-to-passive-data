@@ -73,3 +73,12 @@ export function toDividendsData(rows, tickerMap, watchlist, todayISO, days) {
   }
   return { generated: new Date().toISOString(), window: { from, to }, sample: false, dividends: dividends.sort(byExDate) };
 }
+
+// Shape check, plus at least one dividend: three weeks with none announced means the source broke.
+export function validateDividendsData(d) {
+  if (!d || typeof d !== 'object') return false;
+  if (!d.window || typeof d.window.from !== 'string' || typeof d.window.to !== 'string') return false;
+  if (typeof d.generated !== 'string') return false;
+  if (!Array.isArray(d.dividends) || d.dividends.length === 0) return false;
+  return d.dividends.every((x) => x && typeof x.symbol === 'string' && typeof x.exDate === 'string');
+}
