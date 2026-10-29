@@ -20,9 +20,28 @@ If the fetch fails, the pipeline keeps the last-good `earnings.json` (it never
 overwrites with junk), and if the data goes stale the tool shows badged sample
 data instead of anything wrong.
 
+## Dividends
+
+The same Action also writes `dividends.json`: every US exchange-listed stock, ETF and
+preferred (NYSE, Nasdaq, NYSE Arca, Cboe, NYSE American) with an **announced** ex-dividend
+date from today through 21 days ahead. Dividends show up once declared, so later days
+are sparser. USD only; OTC and foreign lines are left out.
+
+Source is **Polygon.io's free tier** (Nasdaq's dividend calendar only covers
+Nasdaq-listed securities). One-time setup:
+
+1. Create a free account at https://polygon.io and copy your API key.
+2. Repo → Settings → Secrets and variables → Actions → New repository secret →
+   name `POLYGON_API_KEY`, value = the key.
+
+A run takes about 3.5 minutes (the free tier allows 5 requests/minute). If it fails,
+`dividends.json` keeps its last-good contents, earnings still update, and the run
+shows red.
+
 ## Develop
 - `npm test` — unit tests for the transform and both source adapters.
 - `npm run fetch` — fetch live data locally (keyless Nasdaq by default).
 - `EARNINGS_SOURCE=finnhub FINNHUB_API_KEY=xxx npm run fetch` — via Finnhub.
+- `POLYGON_API_KEY=xxx npm run fetch:dividends` — fetch dividends locally.
 
 Edit the watched companies in `watchlist.js`.

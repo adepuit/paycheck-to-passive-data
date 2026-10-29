@@ -5,6 +5,10 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+# A manual run and the scheduled run never push at the same time.
+concurrency:
+  group: earnings
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -20,13 +24,24 @@ jobs:
           EARNINGS_SOURCE: nasdaq
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
         run: node fetch-earnings.js
+      - name: Fetch dividends
+        # Runs even if earnings failed; a dividends failure or hang fails only this step,
+        # so the commit step below still saves earnings.
+        if: ${{ !cancelled() }}
+        timeout-minutes: 12
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
+        run: node fetch-dividends.js
       - name: Commit if changed
+        if: ${{ !cancelled() }}
         run: |
-          if ! git diff --quiet earnings.json; then
+          git add earnings.json
+          if [ -f dividends.json ]; then git add dividends.json; fi
+          # --cached so a brand-new (untracked) dividends.json counts as a change.
+          if ! git diff --cached --quiet; then
             git config user.name "earnings-bot"
             git config user.email "actions@github.com"
-            git add earnings.json
-            git commit -m "Update earnings.json ($(date -u +%Y-%m-%d))"
+            git commit -m "Update data ($(date -u +%Y-%m-%d))"
             git push
           else
             echo "No change."

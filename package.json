@@ -3,5 +3,5 @@
   "version": "1.0.0",
   "private": false,
   "type": "module",
-  "scripts": { "test": "node --test", "fetch": "node fetch-earnings.js" }
+  "scripts": { "test": "node --test", "fetch": "node fetch-earnings.js", "fetch:dividends": "node fetch-dividends.js" }
 }
