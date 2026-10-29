@@ -1,3 +1,10 @@
+import { WATCHLIST } from './watchlist.js';
+import { todayET, addDaysISO } from './earnings.js';
+import { toTickerMap, toDividendsData, validateDividendsData } from './dividends.js';
+
+const DAYS = 21; // forward only: announced ex-dates from today through 3 weeks out
+const MIN_TICKERS = 8000; // measured ~13,250 US-listed tickers; far fewer means a truncated list
+const API = 'https://api.polygon.io';
 const PAGE_GAP_MS = 13000; // free tier allows 5 requests/minute
 const RETRY_WAIT_MS = 60000;
 const ATTEMPTS = 3;
@@ -45,4 +52,19 @@ export async function fetchAllPages(url, { token, fetchImpl = fetch, sleep = def
     u = body.next_url || null;
   }
   return out;
+}
+
+// --- main entry ---
+
+export async function fetchDividends({ token, fetchImpl = fetch, now = todayET(), sleep = defaultSleep } = {}) {
+  if (!token) throw new Error('POLYGON_API_KEY is not set');
+  const opts = { token, fetchImpl, sleep };
+  const to = addDaysISO(now, DAYS);
+  const rows = await fetchAllPages(`${API}/v3/reference/dividends?ex_dividend_date.gte=${now}&ex_dividend_date.lte=${to}&limit=1000`, opts);
+  await sleep(PAGE_GAP_MS);
+  const tickers = toTickerMap(await fetchAllPages(`${API}/v3/reference/tickers?market=stocks&active=true&limit=1000`, opts));
+  if (tickers.size < MIN_TICKERS) throw new Error(`Polygon ticker list too short (${tickers.size})`);
+  const data = toDividendsData(rows, tickers, WATCHLIST, now, DAYS);
+  if (!validateDividendsData(data)) throw new Error('Produced dividends data failed validation');
+  return data;
 }
