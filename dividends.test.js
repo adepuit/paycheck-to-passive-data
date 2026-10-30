@@ -57,6 +57,19 @@ test('toDividendsData filters window/currency/listed, overlays watchlist, maps f
   assert.equal(d.dividends[0].declaredDate, null);
 });
 
+test('toDividendsData keeps pastDays of history: window [today-pastDays, today+days]', () => {
+  const m = toTickerMap(TICKERS);
+  const rows = [
+    div({ ticker: 'KO', ex_dividend_date: '2026-09-27' }), // before today-30: dropped
+    div({ ticker: 'KO', ex_dividend_date: '2026-09-28' }), // first day kept
+    div({ ticker: 'SCHD', ex_dividend_date: '2026-11-27' }), // last day kept
+    div({ ticker: 'SCHD', ex_dividend_date: '2026-11-28' }), // after today+30: dropped
+  ];
+  const d = toDividendsData(rows, m, WL, '2026-10-28', 30, 30);
+  assert.deepEqual(d.window, { from: '2026-09-28', to: '2026-11-27' });
+  assert.deepEqual(d.dividends.map((x) => [x.symbol, x.exDate]), [['KO', '2026-09-28'], ['SCHD', '2026-11-27']]);
+});
+
 test('toDividendsData: BRK.B matches watchlist BRK-B; special flag; exact-dup removed, regular+special kept; same-day sort by symbol', () => {
   const m = toTickerMap(TICKERS);
   const rows = [

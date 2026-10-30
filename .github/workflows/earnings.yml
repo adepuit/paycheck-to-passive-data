@@ -28,7 +28,7 @@ jobs:
         # Runs even if earnings failed; a dividends failure or hang fails only this step,
         # so the commit step below still saves earnings.
         if: ${{ !cancelled() }}
-        timeout-minutes: 12
+        timeout-minutes: 15
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         run: node fetch-dividends.js
