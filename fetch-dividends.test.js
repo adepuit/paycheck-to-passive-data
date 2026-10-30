@@ -63,8 +63,9 @@ test('fetchDividends returns validated whole-market data with watchlist flags', 
   const seen = [];
   const d = await fetchDividends({ token: 'K', fetchImpl: stubFor(8000, DIVS, seen), now: '2026-10-28', sleep: async () => {} });
   assert.equal(seen.length, 2);
-  assert.match(seen[0], /\/v3\/reference\/dividends\?ex_dividend_date\.gte=2026-10-28&ex_dividend_date\.lte=2026-11-18&limit=1000&apiKey=K$/);
+  assert.match(seen[0], /\/v3\/reference\/dividends\?ex_dividend_date\.gte=2026-09-28&ex_dividend_date\.lte=2026-11-27&limit=1000&apiKey=K$/);
   assert.match(seen[1], /\/v3\/reference\/tickers\?market=stocks&active=true&limit=1000&apiKey=K$/);
+  assert.deepEqual(d.window, { from: '2026-09-28', to: '2026-11-27' }); // 30 back, 30 ahead
   assert.deepEqual(d.dividends.map((x) => x.symbol), ['SCHD', 'KO']);
   const ko = d.dividends.find((x) => x.symbol === 'KO');
   assert.equal(ko.watch, true); // KO is in watchlist.js (line 55)

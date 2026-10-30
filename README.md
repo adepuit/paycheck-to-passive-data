@@ -23,9 +23,9 @@ data instead of anything wrong.
 ## Dividends
 
 The same Action also writes `dividends.json`: every US exchange-listed stock, ETF and
-preferred (NYSE, Nasdaq, NYSE Arca, Cboe, NYSE American) with an **announced** ex-dividend
-date from today through 21 days ahead. Dividends show up once declared, so later days
-are sparser. USD only; OTC and foreign lines are left out.
+preferred (NYSE, Nasdaq, NYSE Arca, Cboe, NYSE American) with an ex-dividend date from
+30 days ago through 30 days ahead. Past rows have already gone ex; future rows show up
+once declared, so later days are sparser (most are announced 2–4 weeks ahead). USD only; OTC and foreign lines are left out.
 
 Source is **Polygon.io's free tier** (Nasdaq's dividend calendar only covers
 Nasdaq-listed securities). One-time setup:
@@ -34,7 +34,7 @@ Nasdaq-listed securities). One-time setup:
 2. Repo → Settings → Secrets and variables → Actions → New repository secret →
    name `POLYGON_API_KEY`, value = the key.
 
-A run takes about 3.5 minutes (the free tier allows 5 requests/minute). If it fails,
+A run takes about 7 minutes (the free tier allows 5 requests/minute). If it fails,
 `dividends.json` keeps its last-good contents, earnings still update, and the run
 shows red.
 

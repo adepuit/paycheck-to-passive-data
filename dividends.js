@@ -36,9 +36,9 @@ function byExDate(a, b) {
 }
 
 // Polygon /v3/reference/dividends rows -> dividends.json. Keeps US-listed, USD dividends with
-// an ex-date in [today, today+days], overlaying the watchlist like earnings does.
-export function toDividendsData(rows, tickerMap, watchlist, todayISO, days) {
-  const from = todayISO;
+// an ex-date in [today-pastDays, today+days], overlaying the watchlist like earnings does.
+export function toDividendsData(rows, tickerMap, watchlist, todayISO, days, pastDays = 0) {
+  const from = addDaysISO(todayISO, -pastDays);
   const to = addDaysISO(todayISO, days);
   const wl = new Map(watchlist.map((w) => [w.symbol, w]));
   const seen = new Set();
@@ -74,7 +74,7 @@ export function toDividendsData(rows, tickerMap, watchlist, todayISO, days) {
   return { generated: new Date().toISOString(), window: { from, to }, sample: false, dividends: dividends.sort(byExDate) };
 }
 
-// Shape check, plus at least one dividend: three weeks with none announced means the source broke.
+// Shape check, plus at least one dividend: two months with none means the source broke.
 export function validateDividendsData(d) {
   if (!d || typeof d !== 'object') return false;
   if (!d.window || typeof d.window.from !== 'string' || typeof d.window.to !== 'string') return false;
